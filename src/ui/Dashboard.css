@@ -1,0 +1,258 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;300&family=Noto+Sans+JP:wght@100;200&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --white:        #f0ede8;
+  --white-dim:    rgba(240, 237, 232, 0.55);
+  --white-faint:  rgba(240, 237, 232, 0.25);
+  --black:        #000000;
+  --hud-font:     'Noto Sans JP', sans-serif;
+  --title-font:   'Noto Serif JP', serif;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Canvas ─────────────────────────────────────────── */
+#scene-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 2.4s ease;
+}
+
+#scene-canvas.visible {
+  opacity: 1;
+}
+
+/* ─── Welcome Screen ──────────────────────────────────── */
+#welcome-screen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  z-index: 100;
+  opacity: 1;
+  transition: opacity 1.8s ease;
+  pointer-events: all;
+}
+
+#welcome-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.welcome-ja {
+  font-family: var(--title-font);
+  font-weight: 200;
+  font-size: clamp(1.4rem, 4vw, 2.6rem);
+  letter-spacing: 0.25em;
+  color: var(--white);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 2s ease, transform 2s ease;
+  margin-bottom: 0.55rem;
+}
+
+.welcome-en {
+  font-family: var(--hud-font);
+  font-weight: 100;
+  font-size: clamp(0.6rem, 1.4vw, 0.85rem);
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--white-dim);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 2s ease 0.6s, transform 2s ease 0.6s;
+}
+
+.welcome-divider {
+  width: 1px;
+  height: 0;
+  background: var(--white-faint);
+  margin: 2.2rem 0;
+  transition: height 1.6s ease 1.2s;
+}
+
+.welcome-enter {
+  font-family: var(--hud-font);
+  font-weight: 100;
+  font-size: clamp(0.55rem, 1.2vw, 0.72rem);
+  letter-spacing: 0.5em;
+  color: var(--white-faint);
+  opacity: 0;
+  transition: opacity 1.8s ease 2.2s;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* revealed states */
+.welcome-ja.show      { opacity: 1; transform: translateY(0); }
+.welcome-en.show      { opacity: 1; transform: translateY(0); }
+.welcome-divider.show { height: 48px; }
+.welcome-enter.show   { opacity: 1; }
+
+/* ─── HUD ─────────────────────────────────────────────── */
+#hud {
+  position: fixed;
+  top: 0;
+  right: 0;
+  padding: 1.5rem 1.8rem;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  pointer-events: none;
+}
+
+#hud.visible {
+  opacity: 1;
+}
+
+#hud-time {
+  font-family: var(--hud-font);
+  font-weight: 100;
+  font-size: clamp(0.95rem, 2vw, 1.15rem);
+  letter-spacing: 0.12em;
+  color: var(--white);
+}
+
+#hud-period {
+  font-family: var(--title-font);
+  font-weight: 200;
+  font-size: clamp(0.6rem, 1.2vw, 0.72rem);
+  letter-spacing: 0.3em;
+  color: var(--white-dim);
+}
+
+#hud-weather {
+  font-family: var(--hud-font);
+  font-weight: 100;
+  font-size: clamp(0.55rem, 1vw, 0.65rem);
+  letter-spacing: 0.28em;
+  color: var(--white-faint);
+  margin-top: 0.15rem;
+}
+
+/* ─── Mobile controls hint ───────────────────────────── */
+#mobile-hint {
+  position: fixed;
+  bottom: 1.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--hud-font);
+  font-weight: 100;
+  font-size: 0.6rem;
+  letter-spacing: 0.35em;
+  color: var(--white-faint);
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 50;
+}
+
+#mobile-hint.visible {
+  opacity: 1;
+}
+
+/* only show on touch devices */
+@media (hover: hover) {
+  #mobile-hint { display: none; }
+}
+
+/* ─── Crosshair (desktop) ────────────────────────────── */
+#crosshair {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 50;
+}
+
+#crosshair::before,
+#crosshair::after {
+  content: '';
+  position: absolute;
+  background: var(--white-faint);
+}
+
+#crosshair::before {
+  width: 1px;
+  height: 100%;
+  left: 50%;
+  top: 0;
+}
+
+#crosshair::after {
+  width: 100%;
+  height: 1px;
+  top: 50%;
+  left: 0;
+}
+
+#crosshair.visible {
+  opacity: 1;
+}
+
+/* ─── Train arrival banner ───────────────────────────── */
+#train-banner {
+  position: fixed;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+  z-index: 50;
+}
+
+#train-banner.visible {
+  opacity: 1;
+}
+
+#train-banner-ja {
+  font-family: var(--title-font);
+  font-weight: 200;
+  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+  letter-spacing: 0.2em;
+  color: var(--white-dim);
+}
+
+#train-banner-en {
+  font-family: var(--hud-font);
+  font-weight: 100;
+  font-size: clamp(0.5rem, 1vw, 0.6rem);
+  letter-spacing: 0.35em;
+  color: var(--white-faint);
+}
